@@ -12,9 +12,10 @@ def create_app():
     
     from .doctor_api import doctor_api
     from .patient_api import patient_api
+    from .newdoc import doc
 
     app.register_blueprint(doctor_api, url_prefix='/doctor')
     app.register_blueprint(patient_api, url_prefix='/patient')
-    # app.register_blueprint(doctor_api, url_prefix='/doctors')
+    app.register_blueprint(doc, url_prefix='/doc')
 
     return app
