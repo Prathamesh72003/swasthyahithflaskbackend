@@ -202,7 +202,8 @@ def save_prescription():
                 'tabletPrescription': tablet_prescription,
                 'tonicPrescription': tonic_prescription,
                 'duration': duration,
-                'extraSuggestions': extra_suggestions
+                'extraSuggestions': extra_suggestions,
+                'doc_name': doctor_email
             })
         else:
             # If the prescriptions collection exists, add a new document to it
@@ -211,7 +212,8 @@ def save_prescription():
                 'tabletPrescription': tablet_prescription,
                 'tonicPrescription': tonic_prescription,
                 'duration': duration,
-                'extraSuggestions': extra_suggestions
+                'extraSuggestions': extra_suggestions,
+                'doc_name': doctor_email
             })
 
         # Save prescription to doctor's data
@@ -228,6 +230,24 @@ def save_prescription():
     except Exception as e:
         print('Error saving prescription:', str(e))
         return jsonify({'error': 'An error occurred while saving prescription.'}), 500
+
+@doc.route('/get-prescriptions-by-patient-email', methods=['GET'])
+def get_prescriptions_by_patient_email():
+    patient_email = request.args.get('patient_email')
+
+    if not patient_email:
+        return jsonify({'error': 'Patient email parameter is missing.'}), 400
+
+    try:
+        # Get patient's prescriptions
+        patient_ref = patients_collection.document(patient_email)
+        prescriptions_ref = patient_ref.collection('prescriptions')
+        prescriptions = [prescription.to_dict() for prescription in prescriptions_ref.stream()]
+
+        return jsonify({'prescriptions': prescriptions}), 200
+    except Exception as e:
+        print('Error fetching prescriptions by patient email:', str(e))
+        return jsonify({'error': 'An error occurred while fetching prescriptions by patient email.'}), 500
 
 
 
