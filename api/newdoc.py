@@ -68,3 +68,24 @@ def login_doctor():
     except Exception as e:
         print('Error logging in doctor:', str(e))
         return jsonify({'error': 'An error occurred. Please try again later.'}), 500
+    
+@doc.route('/get-doctor', methods=['GET'])
+def get_doctor_by_email():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'Email parameter is missing'}), 400
+    
+    try:
+        # Query the database to fetch the doctor based on email
+        doctor_ref = doctors_collection.document(email)
+        doctor_data = doctor_ref.get().to_dict()
+
+        if not doctor_data:
+            return jsonify({'error': 'Doctor not found.'}), 404
+
+        # Return the doctor's data
+        return jsonify({'doctor': doctor_data}), 200
+    except Exception as e:
+        print('Error fetching doctor:', str(e))
+        return jsonify({'error': 'An error occurred while fetching doctor details.'}), 500
+
