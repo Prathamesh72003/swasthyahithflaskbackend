@@ -36,6 +36,9 @@ def register_doctor():
             'prescriptions': []
         })
 
+        doctor_ref.collection('appointments')
+        doctor_ref.collection('prescriptions')
+
         return jsonify({'message': 'Doctor registered successfully.', 'email': email}), 201
     except Exception as e:
         print('Error registering doctor:', str(e))
@@ -88,4 +91,55 @@ def get_doctor_by_email():
     except Exception as e:
         print('Error fetching doctor:', str(e))
         return jsonify({'error': 'An error occurred while fetching doctor details.'}), 500
+
+@doc.route('/get-appointments', methods=['GET'])
+def get_appointments():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'Email parameter is missing'}), 400
+    
+    try:
+        # Query the database to fetch the appointments based on doctor's email
+        doctor_ref = doctors_collection.document(email)
+        appointments_ref = doctor_ref.collection('appointments')
+        appointments = [appointment.to_dict() for appointment in appointments_ref.stream()]
+
+        return jsonify({'appointments': appointments}), 200
+    except Exception as e:
+        print('Error fetching appointments:', str(e))
+        return jsonify({'error': 'An error occurred while fetching appointments.'}), 500
+@doc.route('/get-patients', methods=['GET'])
+def get_patients():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'Email parameter is missing'}), 400
+    
+    try:
+        # Query the database to fetch the patients based on doctor's email
+        doctor_ref = doctors_collection.document(email)
+        patients_ref = doctor_ref.collection('patients')
+        patients = [patient.to_dict() for patient in patients_ref.stream()]
+
+        return jsonify({'patients': patients}), 200
+    except Exception as e:
+        print('Error fetching patients:', str(e))
+        return jsonify({'error': 'An error occurred while fetching patients.'}), 500
+
+@doc.route('/get-prescriptions', methods=['GET'])
+def get_prescriptions():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'Email parameter is missing'}), 400
+    
+    try:
+        # Query the database to fetch the prescriptions based on doctor's email
+        doctor_ref = doctors_collection.document(email)
+        prescriptions_ref = doctor_ref.collection('prescriptions')
+        prescriptions = [prescription.to_dict() for prescription in prescriptions_ref.stream()]
+
+        return jsonify({'prescriptions': prescriptions}), 200
+    except Exception as e:
+        print('Error fetching prescriptions:', str(e))
+        return jsonify({'error': 'An error occurred while fetching prescriptions.'}), 500
+
 
