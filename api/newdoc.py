@@ -141,5 +141,34 @@ def get_prescriptions():
     except Exception as e:
         print('Error fetching prescriptions:', str(e))
         return jsonify({'error': 'An error occurred while fetching prescriptions.'}), 500
+    
+@doc.route('/get-appointed-patients', methods=['GET'])
+def get_appointed_patients():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'Email parameter is missing'}), 400
+    
+    try:
+        # Query the database to fetch the doctor's appointments
+        doctor_ref = doctors_collection.document(email)
+        appointments_ref = doctor_ref.collection('appointments')
+        appointments = [appointment.to_dict() for appointment in appointments_ref.stream()]
+        
+        # Extract patient email from each appointment
+        patient_emails = [appointment['email'] for appointment in appointments]
+        
+        # Fetch patient details using their email
+        patients = []
+        for patient_email in patient_emails:
+            patient_ref = db.collection('patients').document(patient_email)
+            patient_data = patient_ref.get().to_dict()
+            if patient_data:
+                patients.append(patient_data)
+        
+        return jsonify({'patients': patients}), 200
+    
+    except Exception as e:
+        print('Error fetching appointed patients:', str(e))
+        return jsonify({'error': 'An error occurred while fetching appointed patients.'}), 500
 
 
