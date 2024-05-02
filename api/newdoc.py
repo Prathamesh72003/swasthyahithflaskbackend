@@ -171,4 +171,63 @@ def get_appointed_patients():
         print('Error fetching appointed patients:', str(e))
         return jsonify({'error': 'An error occurred while fetching appointed patients.'}), 500
 
+patients_collection = db.collection('patients')
+
+@doc.route('/save-prescription', methods=['POST'])
+def save_prescription():
+
+    doctor_email = request.args.get('doctor_email')
+    patient_email = request.args.get('patient_email')
+
+    data = request.json
+
+    patient_name = data.get('patientName')
+    tablet_prescription = data.get('tabletPrescription')
+    tonic_prescription = data.get('tonicPrescription')
+    duration = data.get('duration')
+    extra_suggestions = data.get('extraSuggestions')
+
+    if not all([doctor_email, patient_email, patient_name, tablet_prescription, tonic_prescription, duration, extra_suggestions]):
+        return jsonify({'error': 'Please provide all prescription details, including doctor and patient emails.'}), 400
+
+    try:
+        # Save prescription to patient's data
+        patient_ref = patients_collection.document(patient_email)
+        patient_data = patient_ref.get().to_dict()
+
+        if not patient_data or 'prescriptions' not in patient_data:
+            # If the prescriptions collection doesn't exist for the patient, create it
+            prescriptions_ref = patient_ref.collection('prescriptions').document()
+            prescriptions_ref.set({
+                'tabletPrescription': tablet_prescription,
+                'tonicPrescription': tonic_prescription,
+                'duration': duration,
+                'extraSuggestions': extra_suggestions
+            })
+        else:
+            # If the prescriptions collection exists, add a new document to it
+            prescriptions_ref = patient_ref.collection('prescriptions').document()
+            prescriptions_ref.set({
+                'tabletPrescription': tablet_prescription,
+                'tonicPrescription': tonic_prescription,
+                'duration': duration,
+                'extraSuggestions': extra_suggestions
+            })
+
+        # Save prescription to doctor's data
+        doctor_ref = doctors_collection.document(doctor_email).collection('prescriptions').document()
+        doctor_ref.set({
+            'patientName': patient_name,
+            'tabletPrescription': tablet_prescription,
+            'tonicPrescription': tonic_prescription,
+            'duration': duration,
+            'extraSuggestions': extra_suggestions
+        })
+
+        return jsonify({'message': 'Prescription saved successfully.'}), 200
+    except Exception as e:
+        print('Error saving prescription:', str(e))
+        return jsonify({'error': 'An error occurred while saving prescription.'}), 500
+
+
 
