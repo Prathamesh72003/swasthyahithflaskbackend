@@ -86,20 +86,20 @@ def login_patient():
         return jsonify({'error': 'An error occurred. Please try again later.'}), 500
 
 @patient.route('/book-appointment', methods=['POST'])
-def book_appointment():
-    data = request.get_json()
-
-    doctor_email = data.get('doctor_email')
-    patient_email = data.get('patient_email')
-    appointment_date = data.get('appointment_date')
-    current_condition = data.get('current_condition')
-    specific_symptoms = data.get('specific_symptoms')
-    any_allergy = data.get('any_allergy')
-
-    if not all([doctor_email, patient_email, appointment_date]):
-        return jsonify({'error': 'Please provide doctor email, patient email, and appointment date.'}), 400
-
+async def book_appointment():
     try:
+        data = request.get_json()
+
+        doctor_email = data.get('doctor_email')
+        patient_email = data.get('patient_email')
+        appointment_date = data.get('appointment_date')
+        current_condition = data.get('current_condition')
+        specific_symptoms = data.get('specific_symptoms')
+        any_allergy = data.get('any_allergy')
+
+        if not all([doctor_email, patient_email, appointment_date]):
+            return jsonify({'error': 'Please provide doctor email, patient email, and appointment date.'}), 400
+
         doctor_ref = doctors_collection.document(doctor_email)
         doctor_ref.collection('appointments').add({
             'patient_email': patient_email,
