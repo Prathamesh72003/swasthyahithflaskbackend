@@ -9,13 +9,10 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'secret!'
     
-    
-    from .doctor_api import doctor_api
-    from .patient_api import patient_api
     from .newdoc import doc
+    from .newpatient import patient
 
-    app.register_blueprint(doctor_api, url_prefix='/doctor')
-    app.register_blueprint(patient_api, url_prefix='/patient')
     app.register_blueprint(doc, url_prefix='/doc')
+    app.register_blueprint(patient, url_prefix='/patient')
 
     return app
